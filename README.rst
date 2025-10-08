@@ -49,5 +49,89 @@ After compilation, you can use the following binaries in your experiment files:
 - ``target/release/http3-server``
 - ``target/release/http3-client``
 
-These will be executed automatically by ``runner.py`` when defined in the
-corresponding ``.xp`` file.
+Example: Running a Multipath QUIC Experiment
+=============================================
+
+This section describes a complete example showing how to establish
+a **Multipath QUIC** connection using this framework.
+
+1. Launch the topology
+----------------------
+
+Start a multi-interface topology (in our case ``topo_2``) **without any experiment**
+to access the Mininet CLI:
+
+.. code-block:: console
+
+   sudo python3 runner.py -t config/topo/topo_2
+
+This opens the interactive Mininet CLI with the nodes already connected
+(client, router, server).
+
+---
+
+2. Start the QUIC server
+------------------------
+
+On the server node, run the ``quiche`` server binary with the appropriate
+certificate and key:
+
+.. code-block:: console
+
+   Server_0 bash -lc 'nohup /home/achraf/quiche/target/release/quiche-server \
+      --cert /home/achraf/quiche/certs/cert.pem \
+      --key /home/achraf/quiche/certs/key.pem \
+      --listen 0.0.0.0:4433 \
+      --root /home/achraf/quiche/quiche/examples \
+      > /tmp/qserver.log 2>&1 &'
+
+This launches the QUIC server listening on UDP port **4433**.
+
+---
+
+3. Start the clients (forced IP binding)
+---------------------------------------
+
+From the client node, start **two clients simultaneously**.
+Each one is hardcoded to use a different source IP address,
+to force two distinct QUIC paths.
+
+.. code-block:: console
+
+   Client_0 bash -lc 'LOCAL_BIND=10.0.0.1 /home/achraf/quiche/target/release/quiche-client \
+      https://10.1.0.1:4433/ --no-verify & \
+      LOCAL_BIND=10.0.1.1 /home/achraf/quiche/target/release/quiche-client \
+      https://10.1.0.1:4433/ --no-verify & wait'
+
+If everything works, the clients should output:
+
+.. code-block:: none
+
+   Bonjour, vous êtes bien connecté au serveur QUIC multipath
+
+This confirms both paths successfully connect to the same QUIC server.
+
+---
+
+4. Capture traffic on the router
+--------------------------------
+
+On the router node, start a packet capture to observe both flows:
+
+.. code-block:: console
+
+   Router_0 tcpdump -ni any udp port 4433 -c 40 -vvv > /tmp/capture.log 2>&1 &
+
+This will capture 40 packets of QUIC traffic on port 4433
+from all interfaces.
+
+---
+
+5. Observe the multipath behavior
+---------------------------------
+
+After re-running both clients, you should see **two distinct QUIC flows**
+in the capture logs or in Wireshark, corresponding to the two interfaces.
+
+This demonstrates a working **Multipath QUIC** connection using ``quiche``
+and the Mininet runner framework.
