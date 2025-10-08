@@ -1,33 +1,53 @@
-# Mininet Runner – Multi-path Experiment Framework (Step-by-Step Guide)
+What ?
+======
 
-This repository provides a **Python runner** built on **Mininet** to easily launch
-network topologies with **multiple paths** and run **custom experiments**
-between hosts (e.g., TCP, UDP, QUIC, or others).
+This repository provides a **Python runner** built on `Mininet <http://mininet.org/>`_ 
+to create and control simple network topologies with multiple paths.
 
-> **Default command:**
-> ```bash
-> sudo python3 runner.py -t <topo_file> -x <xp_file>
-> ```
-> *(the old `./mpPerf` command is deprecated)*
+It can be used for a wide range of networking experiments (TCP, UDP, QUIC, etc.).
+In our case, we focus mainly on **Multipath QUIC** tests between two hosts.
+
+Each experiment is defined by a *topology file* (``.para``) and an *experiment file* (``.xp``)
+which describe the network parameters and the commands to execute on each node.
+
+Requirements
+============
+
+To run the experiments, you need the following environment:
+
+- **Operating system:** Ubuntu 20.04+ (or WSL2 with Ubuntu)
+- **Python:** version 3.8 or newer
+- **Mininet:** installed system-wide
+- **System tools:** ``iproute2``, ``ethtool``, ``tcpdump``, and ``tshark`` (for packet capture)
+- **Optional GUI:** Wireshark (to visualize pcap files)
+
+Quick installation:
+
+.. code-block:: console
+
+   sudo apt-get update
+   sudo apt-get install -y mininet iproute2 ethtool tcpdump tshark python3-pip
 
 ---
 
-## 0) Goal of this mini-tutorial
+Optional – QUIC experiments (using *quiche*)
+--------------------------------------------
 
-The framework can be used for many network experiments.  
-In this tutorial, we’ll specifically demonstrate **how to set up a Multipath QUIC
-connection** between a client and a server through a router, capture the traffic,
-and prepare data for **fingerprinting**.
+If you plan to run **QUIC or Multipath QUIC** experiments, you will also need
+the `quiche <https://github.com/cloudflare/quiche>`_ library.
 
----
+Build the client and server binaries with:
 
-## 1) System requirements
+.. code-block:: console
 
-- Ubuntu / WSL with `sudo` privileges  
-- Python ≥ 3.8  
-- Mininet, `iproute2`, `ethtool`, `tcpdump`, and `tshark` (Wireshark CLI)
+   git clone --recursive https://github.com/cloudflare/quiche.git
+   cd quiche
+   cargo build --release --bin http3-server --bin http3-client
 
-Quick install:
-```bash
-sudo apt-get update
-sudo apt-get install -y mininet iproute2 ethtool tcpdump tshark python3-pip
+After compilation, you can use the following binaries in your experiment files:
+
+- ``target/release/http3-server``
+- ``target/release/http3-client``
+
+These will be executed automatically by ``runner.py`` when defined in the
+corresponding ``.xp`` file.
