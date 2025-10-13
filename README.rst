@@ -46,8 +46,8 @@ Build the client and server binaries with:
 
 After compilation, you can use the following binaries in your experiment files:
 
-- ``target/release/http3-server``
-- ``target/release/http3-client``
+- ``target/release/quiche-server``
+- ``target/release/quiche-client``
 
 Example: Running a Multipath QUIC Experiment
 =============================================
@@ -131,7 +131,7 @@ from all interfaces.
 ---------------------------------
 
 After re-running both clients, you should see **two distinct QUIC flows**
-in the capture logs or in Wireshark, corresponding to the two interfaces.
+in the capture logs, corresponding to the two interfaces.
 
 This demonstrates a working **Multipath QUIC** connection using ``quiche``
 and the Mininet runner framework.
