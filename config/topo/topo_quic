@@ -1,6 +1,0 @@
-leftSubnet:10.0.
-rightSubnet:10.1.
-path_c2r_0:100,10,100
-path_c2r_1:100,25,100
-path_r2s_0:1000,5,100
-topoType:MultiIf

@@ -1,0 +1,19 @@
+version: 1
+topology:
+  type: MultiIf
+  subnets:
+    left: 10.0
+    right: 10.1
+
+  paths:
+    - link_type: c2r
+      id: 0
+      delay_ms: 10
+      queue_pkts: 10
+      bw_mbit: 4
+
+    - link_type: c2r
+      id: 1
+      delay_ms: 40
+      queue_pkts: 30
+      bw_mbit: 4
