@@ -49,11 +49,11 @@ After compilation, you can use the following binaries in your experiment files:
 - ``target/release/quiche-server``
 - ``target/release/quiche-client``
 
-Example: Running a Multipath QUIC Experiment
+Example: Running a QUIC Experiment
 =============================================
 
 This section describes a complete example showing how to establish
-a **Multipath QUIC** connection using this framework.
+a **SP QUIC** connection using this framework.
 
 1. Launch the topology
 ----------------------
@@ -127,11 +127,75 @@ from all interfaces.
 
 ---
 
-5. Observe the multipath behavior
----------------------------------
+YAML Support (New)
+==================
 
-After re-running both clients, you should see **two distinct QUIC flows**
-in the capture logs, corresponding to the two interfaces.
+The runner now supports **YAML configuration files** for defining topologies and experiments,
+in addition to the legacy ``.para`` format.
 
-This demonstrates a working **Multipath QUIC** connection using ``quiche``
-and the Mininet runner framework.
+This new format improves readability, structure, and automation.
+
+Legacy vs YAML Example
+----------------------
+
+**Legacy format (``topo_2``):**
+
+.. code-block:: text
+
+   leftSubnet:10.0
+   rightSubnet:10.1
+   path_c2r_0:100,20,4
+   path_c2r_1:1,20,4
+   path_r2s_0:10,20,10
+   topoType:MultIf
+
+**YAML format (``topo_2.yaml``):**
+
+.. code-block:: yaml
+
+   version: 1
+   topology:
+     type: MultiIf
+     subnets:
+       left: 10.0
+       right: 10.1
+
+     paths:
+       - link_type: c2r
+         id: 0
+         delay_ms: 100
+         queue_pkts: 20
+         bw_mbit: 4
+
+       - link_type: c2r
+         id: 1
+         delay_ms: 1
+         queue_pkts: 20
+         bw_mbit: 4
+
+       - link_type: r2s
+         id: 0
+         delay_ms: 10
+         queue_pkts: 20
+         bw_mbit: 10
+
+
+Runner Update
+-------------
+
+The ``runner.py`` script has been updated to automatically detect and parse YAML files
+using the ``--topo_param_file`` option.
+
+Example command:
+
+.. code-block:: console
+
+   sudo python3 runner.py -t config/topo/topo_2.yaml
+
+When a YAML file is provided:
+
+- The runner loads network parameters via the ``yaml`` Python module.
+- The configuration format mirrors the structure of the legacy ``.para`` files.
+- Backward compatibility with existing ``.para`` files is preserved.
+
+
