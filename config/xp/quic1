@@ -1,0 +1,9 @@
+xpType:quic1
+fileSizeBytes:0
+quicImpl:quiche
+quicPort:6121
+quicCertPath:/home/achraf/quiche/certs
+quicNoVerify:1
+quicMultipath:0
+clientPcap:yes
+serverPcap:yes

@@ -1,0 +1,17 @@
+version: 1
+experiment:
+  xp_type: quic_mpath
+
+  env:
+    server_ip: 10.1.0.1
+    client_ip_a: 10.0.0.1
+    client_ip_b: 10.0.1.1
+    port: 4433
+    quiche_server_bin: /home/achraf/quiche/target/release/quiche-server
+    quiche_client_bin: /home/achraf/quiche/target/release/quiche-client
+    cert: /home/achraf/quiche/certs/cert.pem
+    key:  /home/achraf/quiche/certs/key.pem
+    root: /home/achraf/quiche/quiche/examples
+    cap_if1: Router_0-eth0
+    cap_if2: Router_0-eth1
+    cap_count: 200

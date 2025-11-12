@@ -23,9 +23,10 @@ class PQUIC(Experiment):
     NAME = "pquic"
     PARAMETER_CLASS = PQUICParameter
 
-    BIN = "~/pquic/picoquicdemo"
-    CERT_FILE = "~/pquic/certs/cert.pem"
-    KEY_FILE = "~/pquic/certs/key.pem"
+    BIN = "/home/achraf/pquic/picoquicdemo"
+    CERT_FILE = "/home/achraf/pquic/certs/cert.pem"
+    KEY_FILE  = "/home/achraf/pquic/certs/key.pem"
+
     SERVER_LOG = "pquic_server.log"
     CLIENT_LOG = "pquic_client.log"
 

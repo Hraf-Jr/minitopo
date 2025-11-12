@@ -1,7 +1,6 @@
 import importlib
 import pkgutil
 import os
-
 from core.topo import Topo, TopoConfig
 
 pkg_dir = os.path.dirname(__file__)

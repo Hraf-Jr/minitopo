@@ -1,0 +1,7 @@
+xpType:pquic
+pquicPlugins:/home/achraf/pquic/plugins/multipath/multipath.plugin
+pquicClientPlugins:
+pquicServerPlugins:
+pquicSize:2000000
+clientPcap:yes
+serverPcap:yes

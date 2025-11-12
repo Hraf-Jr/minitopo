@@ -1,21 +1,27 @@
-import importlib
-import pkgutil
 import os
+import pkgutil
+import importlib
 
 from core.experiment import Experiment
 
-pkg_dir = os.path.dirname(__file__)
-for (module_loader, name, ispkg) in pkgutil.iter_modules([pkg_dir]):
-    importlib.import_module('.' + name, __package__)
-
-# Track indirect inheritance
+# Dictionnaire public: nom d'expérience -> classe
 EXPERIMENTS = {}
 
-def _get_all_subclasses(BaseClass):
-    for cls in BaseClass.__subclasses__():
-        if hasattr(cls, "NAME"):
-            EXPERIMENTS[cls.NAME] = cls
-        
-        _get_all_subclasses(cls)
+# Import dynamique de tous les sous-modules du package 'experiments'
+_pkg_dir = os.path.dirname(__file__)
+for _loader, _name, _ispkg in pkgutil.iter_modules([_pkg_dir]):
+    importlib.import_module(f"{__name__}.{_name}")
 
-_get_all_subclasses(Experiment)
+def _register_all_subclasses(base_cls):
+    # Enregistre récursivement toutes les sous-classes qui ont un attribut NAME
+    for cls in base_cls.__subclasses__():
+        if hasattr(cls, "NAME") and isinstance(getattr(cls, "NAME"), str):
+            EXPERIMENTS[cls.NAME] = cls
+        _register_all_subclasses(cls)
+
+# Peupler EXPERIMENTS à partir des classes importées
+_register_all_subclasses(Experiment)
+
+# Override explicite: utiliser l'implémentation quiche pour xpType 'quic'
+from .quic1 import QuicheHTTP3
+EXPERIMENTS["quic"] = QuicheHTTP3

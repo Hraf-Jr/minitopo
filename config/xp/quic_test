@@ -1,0 +1,25 @@
+xpType: cmd
+
+serverCmds:
+  - "mkdir -p /tmp/qlog_server"
+  - "RUST_LOG=info QLOGDIR=/tmp/qlog_server \
+     ~/quiche/target/release/quiche-server \
+     --cert ~/quiche/certs/cert.pem \
+     --key  ~/quiche/certs/key.pem \
+     --listen 0.0.0.0:4433 \
+     --root ~/quiche > /tmp/quiche_server.log 2>&1 &"
+  - "sleep 1"   # attendre que le serveur démarre
+
+clientCmds:
+  - "mkdir -p /tmp/qlog_client"
+  - "RUST_LOG=info QLOGDIR=/tmp/qlog_client \
+     ~/quiche/target/release/quiche-client --no-verify \
+     https://10.1.0.1:4433/big.bin > /tmp/quiche_client.log 2>&1"
+
+routerCmds:
+  - "tcpdump -n -i r0-eth0 udp port 4433 -w /tmp/r0_eth0_quic.pcap &"
+  - "tcpdump -n -i r0-eth1 udp port 4433 -w /tmp/r0_eth1_quic.pcap &"
+
+serverEndCmds:
+  - "pkill quiche-server || true"
+  - "pkill tcpdump || true"
