@@ -99,9 +99,8 @@ Inside the Mininet CLI, you can run simple connectivity tests, for example:
 
    mininet> Client_0 ping -c 3 Server_0
 
-This confirms that the topology is functional without requiring a full QUIC
-experiment. More advanced experiments (QUIC, congestion control, multipath, etc.)
-should be handled in dedicated experiment files rather than inside the README.
+That confirms if the topology is functional without requiring a full QUIC
+experiment.
 
 
 YAML Support (New)
