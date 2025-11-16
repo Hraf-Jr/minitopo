@@ -5,10 +5,7 @@ This repository provides a **Python runner** built on `Mininet <http://mininet.o
 to create and control simple network topologies with multiple paths.
 
 It can be used for a wide range of networking experiments (TCP, UDP, QUIC, etc.).
-In our case, we focus mainly on **Multipath QUIC** tests between two hosts.
-
-Each experiment is defined by a *topology file* (``.para``) and an *experiment file* (``.xp``)
-which describe the network parameters and the commands to execute on each node.
+In our case, we focus mainly on **QUIC** tests between two hosts.
 
 Requirements
 ============
@@ -42,7 +39,7 @@ Build the client and server binaries with:
 
    git clone --recursive https://github.com/cloudflare/quiche.git
    cd quiche
-   cargo build --release --bin http3-server --bin http3-client
+   cargo build --release --bin quiche-server --bin quiche-client
 
 After compilation, you can use the following binaries in your experiment files:
 
@@ -53,13 +50,23 @@ Example: Running a QUIC Experiment
 =============================================
 
 This section describes a complete example showing how to establish
-a **SP QUIC** connection using this framework.
+a **Single Path QUIC** connection using this framework.
 
-1. Launch the topology
+1. The topology
 ----------------------
 
-Start a multi-interface topology (in our case ``topo_2``) **without any experiment**
+Start a multi-interface topology (in our case ``topo_2.yaml``) **without any experiment**
 to access the Mininet CLI:
+
+This topology creates a simple 3-node setup composed of:
+
+- a client host with two network interfaces (10.0.0.1 and 10.0.1.1),
+- a router connecting both subnets (10.0.x.0/24),
+- a server host reachable on the right subnet (10.1.0.1).
+
+Each interface of the client is connected to the router with its own link characteristics
+(delay, bandwidth, queue size). The server receives traffic coming from both paths through the router.
+
 
 .. code-block:: console
 
@@ -70,62 +77,32 @@ This opens the interactive Mininet CLI with the nodes already connected
 
 ---
 
-2. Start the QUIC server
-------------------------
+Simple Example
+--------------
 
-On the server node, run the ``quiche`` server binary with the appropriate
-certificate and key:
-
-.. code-block:: console
-
-   Server_0 bash -lc 'nohup /home/achraf/quiche/target/release/quiche-server \
-      --cert /home/achraf/quiche/certs/cert.pem \
-      --key /home/achraf/quiche/certs/key.pem \
-      --listen 0.0.0.0:4433 \
-      --root /home/achraf/quiche/quiche/examples \
-      > /tmp/qserver.log 2>&1 &'
-
-This launches the QUIC server listening on UDP port **4433**.
-
----
-
-3. Start the clients (forced IP binding)
----------------------------------------
-
-From the client node, start **two clients simultaneously**.
-Each one is hardcoded to use a different source IP address,
-to force two distinct QUIC paths.
+To verify that the runner and topology are working correctly, you can start the
+topology and interact with it using the Mininet CLI:
 
 .. code-block:: console
 
-   Client_0 bash -lc 'LOCAL_BIND=10.0.0.1 /home/achraf/quiche/target/release/quiche-client \
-      https://10.1.0.1:4433/ --no-verify & \
-      LOCAL_BIND=10.0.1.1 /home/achraf/quiche/target/release/quiche-client \
-      https://10.1.0.1:4433/ --no-verify & wait'
+   sudo python3 runner.py -t config/topo/topo_2.yaml
 
-If everything works, the clients should output:
+This starts the network with three nodes:
 
-.. code-block:: none
+- ``Client_0`` (two interfaces)
+- ``Router_0``
+- ``Server_0``
 
-   Bonjour, vous êtes bien connecté au serveur QUIC multipath
-
-This confirms both paths successfully connect to the same QUIC server.
-
----
-
-4. Capture traffic on the router
---------------------------------
-
-On the router node, start a packet capture to observe both flows:
+Inside the Mininet CLI, you can run simple connectivity tests, for example:
 
 .. code-block:: console
 
-   Router_0 tcpdump -ni any udp port 4433 -c 40 -vvv > /tmp/capture.log 2>&1 &
+   mininet> Client_0 ping -c 3 Server_0
 
-This will capture 40 packets of QUIC traffic on port 4433
-from all interfaces.
+This confirms that the topology is functional without requiring a full QUIC
+experiment. More advanced experiments (QUIC, congestion control, multipath, etc.)
+should be handled in dedicated experiment files rather than inside the README.
 
----
 
 YAML Support (New)
 ==================
@@ -183,19 +160,6 @@ Legacy vs YAML Example
 Runner Update
 -------------
 
-The ``runner.py`` script has been updated to automatically detect and parse YAML files
-using the ``--topo_param_file`` option.
-
-Example command:
-
-.. code-block:: console
-
-   sudo python3 runner.py -t config/topo/topo_2.yaml
-
-When a YAML file is provided:
-
-- The runner loads network parameters via the ``yaml`` Python module.
-- The configuration format mirrors the structure of the legacy ``.para`` files.
-- Backward compatibility with existing ``.para`` files is preserved.
+The ``runner.py`` script automatically detects and parse YAML files
 
 
