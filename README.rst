@@ -46,11 +46,8 @@ After compilation, you can use the following binaries in your experiment files:
 - ``target/release/quiche-server``
 - ``target/release/quiche-client``
 
-Example: Running a QUIC Experiment
+Simple Example
 =============================================
-
-This section describes a complete example showing how to establish
-a **Single Path QUIC** connection using this framework.
 
 1. The topology
 ----------------------
@@ -76,9 +73,6 @@ This opens the interactive Mininet CLI with the nodes already connected
 (client, router, server).
 
 ---
-
-Simple Example
---------------
 
 To verify that the runner and topology are working correctly, you can start the
 topology and interact with it using the Mininet CLI:
